@@ -1,6 +1,4 @@
-// components/ThreeScene.tsx
-// credit: https://github.com/mrdoob/three.js/blob/master/examples/webgl_buffergeometry_drawrange.html
-
+// src inpiration: https://github.com/mrdoob/three.js/blob/master/examples/webgl_buffergeometry_drawrange.html
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -13,9 +11,9 @@ const ThreeScene: React.FC = () => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    let container, stats;
-    let camera, scene, renderer;
-    let group;
+    let container: HTMLDivElement, stats: any;
+    let camera: THREE.PerspectiveCamera, scene: THREE.Scene, renderer: THREE.WebGLRenderer;
+    let group: THREE.Group;
     const particlesData: any[] = [];
     let positions: Float32Array, colors: Float32Array;
     let particles: THREE.BufferGeometry;
@@ -41,8 +39,7 @@ const ThreeScene: React.FC = () => {
     animate();
 
     function init() {
-
-      container = mount;
+      container = mount as HTMLDivElement;
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 4000);
       camera.position.z = 1750;
@@ -53,9 +50,10 @@ const ThreeScene: React.FC = () => {
       scene.add(group);
 
       const helper = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(r, r, r)));
-      helper.material.color.setHex(0x474747);
-      helper.material.blending = THREE.AdditiveBlending;
-      helper.material.transparent = true;
+      const material = helper.material as THREE.LineBasicMaterial;
+      material.color.setHex(0x474747);
+      material.blending = THREE.AdditiveBlending;
+      material.transparent = true;
       group.add(helper);
 
       const segments = maxParticleCount * maxParticleCount;
@@ -102,13 +100,13 @@ const ThreeScene: React.FC = () => {
       geometry.computeBoundingSphere();
       geometry.setDrawRange(0, 0);
 
-      const material = new THREE.LineBasicMaterial({
+      const materialLines = new THREE.LineBasicMaterial({
         vertexColors: true,
         blending: THREE.AdditiveBlending,
         transparent: true
       });
 
-      linesMesh = new THREE.LineSegments(geometry, material);
+      linesMesh = new THREE.LineSegments(geometry, materialLines);
       group.add(linesMesh);
 
       renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -199,7 +197,9 @@ const ThreeScene: React.FC = () => {
     }
 
     return () => {
-      mount.removeChild(renderer.domElement);
+      if (renderer && container) {
+        container.removeChild(renderer.domElement);
+      }
       window.removeEventListener('resize', onWindowResize);
     };
   }, []);
